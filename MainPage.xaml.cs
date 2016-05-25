@@ -32,11 +32,12 @@ namespace Blinky
         public MainPage()
         {
             InitializeComponent();
+            InitGPIO();
 
             timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(500);
+            timer.Interval = TimeSpan.FromMilliseconds(5000);
             timer.Tick += Timer_Tick;
-            InitGPIO();
+            
             if (PINS != null)
             {
                 timer.Start();
