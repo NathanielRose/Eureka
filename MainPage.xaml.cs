@@ -57,7 +57,7 @@ namespace Blinky
             }
 
 
-            pinValue = GpioPinValue.High;
+            pinValue = GpioPinValue.Low;
             int[] ports = new int[3] { 17, 23, 27 };
 
             foreach (var port in ports)
@@ -80,6 +80,16 @@ namespace Blinky
             {
                 case "RED":
                     {
+                        if (pinValue == GpioPinValue.High)
+                        {
+                            pinValue = GpioPinValue.Low;
+                            PINS[17].Write(pinValue);
+                        }
+                        else
+                        {
+                            pinValue = GpioPinValue.High;
+                            PINS[17].Write(pinValue);
+                        }
                         break;
                     }
                     case "GREEN":
@@ -95,27 +105,7 @@ namespace Blinky
                         break;
                     }
 
-            }
-
-            if (pinValue == GpioPinValue.High)
-            {
-                pinValue = GpioPinValue.Low;
-                foreach (KeyValuePair<int, GpioPin> item in PINS)
-                {
-                    item.Value.Write(pinValue);
-                }
-                LED.Fill = redBrush;
-            }
-            else
-            {
-                pinValue = GpioPinValue.High;
-                foreach (KeyValuePair<int, GpioPin> item in PINS)
-                {
-                    item.Value.Write(pinValue);
-                }
-                LED.Fill = redBrush;
-                LED.Fill = grayBrush;
-            }
+            }            
         }
 
         public async Task<string> ReceiveMessage()
