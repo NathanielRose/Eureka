@@ -1,3 +1,4 @@
+*.pfx
 *.suo
 *.user
 bin
