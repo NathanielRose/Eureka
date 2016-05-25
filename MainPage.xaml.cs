@@ -2,11 +2,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Media;
+using Microsoft.Azure.Devices.Client;
+using System.Text;
+using System.Diagnostics;
 
 namespace Blinky
 {
@@ -21,6 +25,9 @@ namespace Blinky
         private DispatcherTimer timer;
         private SolidColorBrush redBrush = new SolidColorBrush(Windows.UI.Colors.Red);
         private SolidColorBrush grayBrush = new SolidColorBrush(Windows.UI.Colors.LightGray);
+
+        private static string deviceClientConnString = "HostName=Project-Eureka-IoT-Hub.azure-devices.net;DeviceId=EurekaPi;SharedAccessKey=bRLA01/9lysbaq4rx3CsF5CoqtOeOLArtiVjNQHHZMQ=";
+        private DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(deviceClientConnString);
 
         public MainPage()
         {
@@ -65,8 +72,31 @@ namespace Blinky
 
         }
 
-        private void Timer_Tick(object sender, object e)
+        private async void Timer_Tick(object sender, object e)
         {
+            string message = await ReceiveMessage();
+
+            switch (message)
+            {
+                case "RED":
+                    {
+                        break;
+                    }
+                    case "GREEN":
+                    {
+                        break;
+                    }
+                    case "BLUE":
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+
+            }
+
             if (pinValue == GpioPinValue.High)
             {
                 pinValue = GpioPinValue.Low;
@@ -85,6 +115,30 @@ namespace Blinky
                 }
                 LED.Fill = redBrush;
                 LED.Fill = grayBrush;
+            }
+        }
+
+        public async Task<string> ReceiveMessage()
+        {
+            try
+            {
+                var receivedMessage = await this.deviceClient.ReceiveAsync();
+
+                if (receivedMessage != null)
+                {
+                    var messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
+                    await deviceClient.CompleteAsync(receivedMessage);
+                    return messageData;
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Exception when receiving message:" + e.Message);
+                return string.Empty;
             }
         }
     }
