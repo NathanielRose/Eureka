@@ -74,38 +74,38 @@ namespace Blinky
 
         private async void Timer_Tick(object sender, object e)
         {
+            foreach (KeyValuePair<int, GpioPin> item in PINS)
+            {
+                item.Value.Write(GpioPinValue.Low);
+            }
+
             string message = await ReceiveMessage();
 
             switch (message)
             {
                 case "RED":
                     {
-                        if (pinValue == GpioPinValue.High)
-                        {
-                            pinValue = GpioPinValue.Low;
-                            PINS[17].Write(pinValue);
-                        }
-                        else
-                        {
-                            pinValue = GpioPinValue.High;
-                            PINS[17].Write(pinValue);
-                        }
+                        pinValue = GpioPinValue.High;
+                        PINS[17].Write(pinValue);
                         break;
                     }
-                    case "GREEN":
+                case "GREEN":
                     {
+                        pinValue = GpioPinValue.High;
+                        PINS[23].Write(pinValue);
                         break;
                     }
-                    case "BLUE":
+                case "BLUE":
                     {
+                        pinValue = GpioPinValue.High;
+                        PINS[27].Write(pinValue);
                         break;
                     }
                 default:
                     {
                         break;
                     }
-
-            }            
+            }
         }
 
         public async Task<string> ReceiveMessage()
