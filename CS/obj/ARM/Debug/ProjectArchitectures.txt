@@ -1,0 +1,1 @@
+C:\Users\Chakra Prime\Documents\GitHub\samples\Blinky\CS\Blinky.csproj;arm
