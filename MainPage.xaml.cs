@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
-using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Windows.Devices.Gpio;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -35,9 +36,9 @@ namespace Blinky
             InitGPIO();
 
             timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(5000);
+            timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Tick += Timer_Tick;
-            
+
             if (PINS != null)
             {
                 timer.Start();
@@ -58,8 +59,14 @@ namespace Blinky
             }
 
 
-            pinValue = GpioPinValue.Low;
-            int[] ports = new int[3] { 17, 23, 27 };
+            pinValue = GpioPinValue.High;
+            int[] ports = new int[5] { 17, 25, 23, 27, 16 };
+            // 17 red
+            // 25 red
+            // 23 green
+            // 27 green
+            // 16 blue
+            // 1 solid 2 blink else off
 
             foreach (var port in ports)
             {
@@ -73,43 +80,36 @@ namespace Blinky
 
         }
 
-        private async void Timer_Tick(object sender, object e)
+        private void SetState(string[] state)
         {
+            int i = 0;
             foreach (KeyValuePair<int, GpioPin> item in PINS)
             {
-                item.Value.Write(GpioPinValue.Low);
-            }
+                var togglePinValue = GpioPinValue.High;
 
-            string message = await ReceiveMessage();
+                if (state[i] == "1")
+                {
+                    item.Value.Write(GpioPinValue.High);
+                }
+                else if (state[i] == "2")
+                {
+                    item.Value.Write(GpioPinValue.High);
+                }
+                else
+                {
+                    item.Value.Write(GpioPinValue.Low);
+                }
 
-            switch (message)
-            {
-                case "RED":
-                    {
-                        pinValue = GpioPinValue.High;
-                        PINS[17].Write(pinValue);
-                        break;
-                    }
-                case "GREEN":
-                    {
-                        pinValue = GpioPinValue.High;
-                        PINS[23].Write(pinValue);
-                        break;
-                    }
-                case "BLUE":
-                    {
-                        pinValue = GpioPinValue.High;
-                        PINS[27].Write(pinValue);
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
+                i++;
             }
         }
 
-        public async Task<string> ReceiveMessage()
+        private async void Timer_Tick(object sender, object e)
+        {             
+            await ProcessMessageQueue();
+        }
+
+        public async Task ProcessMessageQueue()
         {
             try
             {
@@ -118,19 +118,19 @@ namespace Blinky
                 if (receivedMessage != null)
                 {
                     var messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
+                    var state = messageData.Split(',');
                     await deviceClient.CompleteAsync(receivedMessage);
-                    return messageData;
-                }
-                else
-                {
-                    return string.Empty;
+                    SetState(state);
                 }
             }
             catch (Exception e)
             {
                 Debug.WriteLine("Exception when receiving message:" + e.Message);
-                return string.Empty;
             }
         }
+
+        // message on
+
+        // message off
     }
 }
