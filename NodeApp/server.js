@@ -3,9 +3,15 @@ var app = express();
 var redis = require('redis')
 var osc = require('osc')
 
+var clientFromConnectionString = require('azure-iot-device-amqp').clientFromConnectionString;
+var Message = require('azure-iot-device').Message;
+
+
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var bodyParser = require('body-parser')
+
+var connectionString = 'FillInLater';
 
 var lastPointTime = Date.now();
 var now;
