@@ -72,15 +72,25 @@ io.on('connection', function (socket) {
 		if((now-lastPointTime <= 1000) || (lastPointTime-now <= 1000)) {
 			lastPointTime = now
 			socket.emit('news', oscData); 
-			
+
+			if(oscData.address == '/muse/elements/horseshoe') {
+			console.log('This is the value', oscData.args );
+			}
+			// '/muse/eeg'
+
 		}
 	});
 
+	/*udpPort.on('/muse/eeg', function(oscdata) {
+			console.log('This is the current state of 0 arg :', oscdata);
+
+	});*/
+
 });
 
- /*Muse.on('/muse/eeg', function(){
-     console.log('/muse/eeg', JSON.stringify(arguments));
- });*/
+/*function checkHorseshoe(horseData) {
+	if(hoseData.args[0])
+}*/
 
 var port = Number(process.env.PORT || 3000);
 server.listen(port, function() {
