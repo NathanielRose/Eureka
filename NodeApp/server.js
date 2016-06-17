@@ -88,7 +88,7 @@ io.on('connection', function (socket) {
 
 });
 
-/*function checkHorseshoe(horseData) {
+/*function checkHorseshoe(horseData) {xdddd
 	if(hoseData.args[0])
 }*/
 
