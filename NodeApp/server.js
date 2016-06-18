@@ -29,6 +29,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded())
 app.use(express.static(__dirname + '/public'));
 
+//The following are a list of the passed data variables to the cloud hub
+var eegPadState = [ 4, 4, 4, 4];
+var blink = false;
+var jaw = false;
+var eegAlpha = [0.0, 0.0, 0.0, 0.0];
+var eegGamma = [0.0, 0.0, 0.0, 0.0];
+
+
 
 client.open(function (err) {
 	if (err) {
@@ -74,9 +82,29 @@ io.on('connection', function (socket) {
 			socket.emit('news', oscData); 
 
 			if(oscData.address == '/muse/elements/horseshoe') {
-			console.log('This is the value', oscData.args );
+			//console.log('This is the value', oscData.args );
+			setHorseshoe(oscData.args);
 			}
-			// '/muse/eeg'
+
+			if(oscData.address == '/muse/elements/blink')
+			{
+				blink = oscData.args[0];
+				//console.log( 'This is the Blink value', blink);
+				
+			}
+
+			if(oscData.address == '/muse/elements/jaw_clench'){
+				jaw = oscData.args[0];
+				//console.log('This is the Jaw value', jaw);
+			}
+
+			if(oscData.address == '/muse/elements/alpha_absolute'){
+				//eegAlpha = oscData.args;
+				console.log('This is the alpha_absolute value', eegAlpha);
+			}
+
+			
+			
 
 		}
 	});
@@ -88,9 +116,18 @@ io.on('connection', function (socket) {
 
 });
 
-/*function checkHorseshoe(horseData) {xdddd
-	if(hoseData.args[0])
-}*/
+function setHorseshoe(horseData) {
+	var currentHorseShoe = horseData;
+	if (currentHorseShoe[0]!== 4 && currentHorseShoe[1] !== 4
+		&& currentHorseShoe[2] !== 4 && currentHorseShoe[3] !== 4)
+		{
+			console.log('Detected a good connection', currentHorseShoe)
+			eegPadState[0] = currentHorseShoe[0];
+			eegPadState[1] = currentHorseShoe[1];
+			eegPadState[2] = currentHorseShoe[2];
+			eegPadState[3] = currentHorseShoe[3];
+		}
+}
 
 var port = Number(process.env.PORT || 3000);
 server.listen(port, function() {
