@@ -35,6 +35,10 @@ var blink = false;
 var jaw = false;
 var eegAlpha = [0.0, 0.0, 0.0, 0.0];
 var eegGamma = [0.0, 0.0, 0.0, 0.0];
+var eegConcentration = 0.0;
+var eegMellow = 0.0
+var messagecounter = 0;
+var goodEEGstate = false;
 
 
 
@@ -84,24 +88,48 @@ io.on('connection', function (socket) {
 			if(oscData.address == '/muse/elements/horseshoe') {
 			//console.log('This is the value', oscData.args );
 			setHorseshoe(oscData.args);
+			messagecounter++;
 			}
 
 			if(oscData.address == '/muse/elements/blink')
 			{
 				blink = oscData.args[0];
 				//console.log( 'This is the Blink value', blink);
-				
+				messagecounter++
 			}
 
 			if(oscData.address == '/muse/elements/jaw_clench'){
 				jaw = oscData.args[0];
 				//console.log('This is the Jaw value', jaw);
+				messagecounter++;
 			}
 
 			if(oscData.address == '/muse/elements/alpha_absolute'){
-				//eegAlpha = oscData.args;
-				console.log('This is the alpha_absolute value', eegAlpha);
+				eegAlpha = oscData.args;
+				//console.log('This is the alpha_absolute value', eegAlpha);
+				messagecounter++;
 			}
+
+			if(oscData.address == '/muse/elements/gamma_absolute'){
+				eegGamma = oscData.args;
+				//console.log('This is the gamma_absolute value', eegGamma);
+				messagecounter++
+			}
+
+			if(oscData.address == '/muse/elements/experimental/concentration'){
+				eegConcentration = oscData.args[0];
+				//console.log('This is the concentration value :', eegConcentration);
+				messagecounter++
+			}
+
+			if(oscData.address == '/muse/elements/experimental/mellow'){
+				eegMellow = oscData.args[0];
+				console.log('This is the mellow value :', eegMellow);
+				sendEEGData();
+				messagecounter =0;
+			}
+
+		
 
 			
 			
@@ -121,12 +149,32 @@ function setHorseshoe(horseData) {
 	if (currentHorseShoe[0]!== 4 && currentHorseShoe[1] !== 4
 		&& currentHorseShoe[2] !== 4 && currentHorseShoe[3] !== 4)
 		{
+			goodEEGstate = true;
 			console.log('Detected a good connection', currentHorseShoe)
 			eegPadState[0] = currentHorseShoe[0];
 			eegPadState[1] = currentHorseShoe[1];
 			eegPadState[2] = currentHorseShoe[2];
 			eegPadState[3] = currentHorseShoe[3];
 		}
+		else{
+			goodEEGstate = false;
+		}
+}
+
+function sendEEGData()
+{
+	if(goodEEGstate)
+	{
+		var hubMessage = JSON.stringify({alpha_absolute_tp9: eegAlpha[0], alpha_absolute_fp1: eegAlpha[1], 
+			alpha_absolute_fp2: eegAlpha[2], alpha_absolute_tp10: eegAlpha[3], gamma_absolute_tp9: eegGamma[0],
+		gamma_absolute_fp1: eegGamma[1], gamma_absolute_fp2: eegGamma[2], gamma_absolute_tp10: eegGamma[3],
+		horseshoe_tp9: eegPadState[0], horseshoe_fp1: eegPadState[1], horseshoe_fp2: eegPadState[2], horseshoe_tp10:
+		eegPadState[3]});
+
+		console.log('This is the hub message :', hubMessage);
+		
+
+	}
 }
 
 var port = Number(process.env.PORT || 3000);
