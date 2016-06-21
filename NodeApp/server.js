@@ -9,11 +9,8 @@ var OSCm = nodeMuse.osc;
 
 var Muse = nodeMuse.connect().Muse;
 
-
-
 var clientFromConnectionString = require ('azure-iot-device-amqp').clientFromConnectionString;
 var Message = require('azure-iot-device').Message;
-
 
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
@@ -165,16 +162,28 @@ function sendEEGData()
 {
 	if(goodEEGstate)
 	{
-		var hubMessage = JSON.stringify({alpha_absolute_tp9: eegAlpha[0], alpha_absolute_fp1: eegAlpha[1], 
+		var hubData = JSON.stringify({alpha_absolute_tp9: eegAlpha[0], alpha_absolute_fp1: eegAlpha[1], 
 			alpha_absolute_fp2: eegAlpha[2], alpha_absolute_tp10: eegAlpha[3], gamma_absolute_tp9: eegGamma[0],
 		gamma_absolute_fp1: eegGamma[1], gamma_absolute_fp2: eegGamma[2], gamma_absolute_tp10: eegGamma[3],
 		horseshoe_tp9: eegPadState[0], horseshoe_fp1: eegPadState[1], horseshoe_fp2: eegPadState[2], horseshoe_tp10:
-		eegPadState[3]});
+		eegPadState[3], blink_value: blink, jaw_clench_value: jaw, concentration: eegConcentration, mellow: eegMellow});
 
-		console.log('This is the hub message :', hubMessage);
-		
-
+		var hubMessage = new Message(hubData);
+		console.log("Sending Message : " + hubMessage.getData());
+		client.sendEvent(hubMessage, printResultFor('send'));
+		//console.log('This is the hub message :', hubData);
 	}
+}
+
+function printResultFor(op)
+{
+	return function printResultFor(err, res) {
+		if (err) {
+			console.log(op + ' error: ' + err.toString());
+		} else{
+			console.log(op + ' status: ', res);
+		}
+	};
 }
 
 var port = Number(process.env.PORT || 3000);
