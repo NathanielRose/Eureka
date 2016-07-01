@@ -23,6 +23,3 @@ Greg Degruy https://github.com/gregdegruy
 ## License
 
 MIT
-
-![alt tag](https://cdn2.scratch.mit.edu/get_image/user/13690549_90x90.png)
-
